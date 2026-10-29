@@ -1,0 +1,567 @@
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <style>
+    #rubyGraph,
+    #rubyGraph * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    #rubyGraph {
+      --console: #101114;
+      --panel: #15171b;
+      --panel-raised: #1b1d23;
+      --border: #30333b;
+      --text: #e6e6e6;
+      --muted: #9297a1;
+      --green: #a6e22e;
+      --purple: #ae81ff;
+      --pink: #f92672;
+      --blue: #66d9ef;
+      --orange: #fd971f;
+
+      width: min(100%, 760px);
+      margin: 24px auto 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.015);
+    }
+
+    #rubyGraph .ruby-graph__header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      height: 38px;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(180deg, #1a1c21, #15171b);
+    }
+
+    #rubyGraph .ruby-graph__lights {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 6px;
+    }
+
+    #rubyGraph .ruby-graph__light {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    #rubyGraph .ruby-graph__light--red {
+      background: var(--pink);
+    }
+
+    #rubyGraph .ruby-graph__light--yellow {
+      background: var(--orange);
+    }
+
+    #rubyGraph .ruby-graph__light--green {
+      background: var(--green);
+    }
+
+    #rubyGraph .ruby-graph__title {
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    #rubyGraph .ruby-graph__title span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    #rubyGraph .ruby-graph__toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      height: 38px;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+      background: var(--panel);
+    }
+
+    #rubyGraph .ruby-graph__depth {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      gap: 9px;
+      min-width: 0;
+      height: 100%;
+      color: #b294bb;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #rubyGraph .ruby-graph__slider {
+      width: min(150px, 34vw);
+      height: 6px;
+      appearance: none;
+      border: 0;
+      border-radius: 3px;
+      outline: none;
+      background: rgba(178, 148, 187, 0.2);
+      cursor: pointer;
+    }
+
+    #rubyGraph .ruby-graph__slider::-webkit-slider-thumb {
+      width: 14px;
+      height: 14px;
+      appearance: none;
+      border: 2px solid #b294bb;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    #rubyGraph .ruby-graph__slider::-moz-range-thumb {
+      width: 10px;
+      height: 10px;
+      border: 2px solid #b294bb;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    #rubyGraph .ruby-graph__value {
+      display: inline-block;
+      min-width: 18px;
+      color: #b294bb;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    #rubyGraph .ruby-graph__button {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel-raised);
+      color: var(--blue);
+      cursor: pointer;
+      transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+    }
+
+    #rubyGraph .ruby-graph__button:hover {
+      border-color: var(--purple);
+      background: #24202e;
+      color: var(--purple);
+    }
+
+    #rubyGraph .ruby-graph__button svg {
+      display: block;
+      width: 14px;
+      height: 14px;
+    }
+
+    #rubyGraph .ruby-graph__stage {
+      position: relative;
+      width: 100%;
+      height: clamp(320px, 70vw, 560px);
+      background-color: var(--console);
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        radial-gradient(ellipse at center, rgba(174, 129, 255, 0.07), transparent 68%);
+      background-size: 28px 28px, 28px 28px, 100% 100%;
+    }
+
+    #rubyGraph .ruby-graph__network {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #rubyGraph .ruby-graph__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.055);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    #rubyGraph .ruby-graph__status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--green);
+    }
+
+    #rubyGraph .ruby-graph__status::before {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px rgba(166, 226, 46, 0.55);
+      content: "";
+    }
+
+    #rubyGraph:fullscreen {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: var(--console);
+    }
+
+    #rubyGraph:fullscreen .ruby-graph__stage {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+    }
+
+    @media (max-width: 480px) {
+      #rubyGraph {
+        margin-top: 18px;
+        border-radius: 6px;
+      }
+
+      #rubyGraph .ruby-graph__header {
+        padding: 0 12px;
+      }
+
+      #rubyGraph .ruby-graph__title,
+      #rubyGraph .ruby-graph__title span {
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      #rubyGraph .ruby-graph__toolbar {
+        gap: 7px;
+        padding: 0 12px;
+      }
+
+      #rubyGraph .ruby-graph__stage {
+        height: 390px;
+      }
+
+      #rubyGraph .ruby-graph__footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <section id="rubyGraph" aria-label="Интерактивный граф навигации">
+    <header class="ruby-graph__header">
+      <div class="ruby-graph__lights" aria-hidden="true">
+        <span class="ruby-graph__light ruby-graph__light--red"></span>
+        <span class="ruby-graph__light ruby-graph__light--yellow"></span>
+        <span class="ruby-graph__light ruby-graph__light--green"></span>
+      </div>
+
+      <h2 class="ruby-graph__title">
+        navigation <span>/ shw.4rm4_dr4g0n</span>
+      </h2>
+    </header>
+
+    <div class="ruby-graph__toolbar">
+      <label class="ruby-graph__depth" for="rubyGraphDepth">
+        <span>Глубина</span>
+        <input
+          class="ruby-graph__slider"
+          id="rubyGraphDepth"
+          type="range"
+          min="1"
+          max="4"
+          value="2"
+        >
+        <output class="ruby-graph__value" id="rubyGraphDepthValue">2</output>
+      </label>
+
+      <button
+        class="ruby-graph__button"
+        type="button"
+        id="rubyGraphCenter"
+        title="Центрировать граф"
+        aria-label="Центрировать граф"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3.5 12h17M12 3c2.5 2.5 3.7 5.5 3.7 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.7 5.5-3.7 9S9.5 18.5 12 21"></path>
+        </svg>
+      </button>
+
+      <button
+        class="ruby-graph__button"
+        type="button"
+        id="rubyGraphFullscreen"
+        title="На весь экран"
+        aria-label="На весь экран"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="ruby-graph__stage">
+      <div class="ruby-graph__network" id="rubyGraphNetwork"></div>
+    </div>
+
+    <footer class="ruby-graph__footer">
+      <span class="ruby-graph__status">система готова</span>
+      <span>Перетаскивайте узлы · прокрутка меняет масштаб</span>
+    </footer>
+  </section>
+
+  <script>
+    const centerId = 0;
+
+    const labels = [
+      "голосования", "двенадцатый", "аксель",
+      "вдругорядь", "якорь", "Мальборо",
+      "османской", "заиндевевшей", "амфимерной",
+      "зело", "считывает", "финтифант",
+      "либидостимулирующий", "сандал", "каждения",
+      "оскароносный", "олигархически", "посверкивающего",
+      "мыши", "мебелировки", "результатов",
+      "буханка", "дефибриллируют", "мандельштамовку",
+      "рамки", "с", "хоккеистом",
+      "на", "закате", "мазутоподогреватель",
+      "кунжута", "разрыва", "жгуче",
+      "роман", "цзяолиньпао", "чуфанит",
+      "постный", "блюмс", "прыжок",
+      "невероятно", "мефитическая", "еликожды",
+      "plesneveli", "меж", "оттого",
+      "неукоснительно", "по", "принятии",
+      "двумстам", "блока", "гальванизирует",
+      "бифштекс", "между", "метадискурсом",
+      "брандахлыстка", "отнюдь", "типа",
+      "всемилостиво", "санкюлотизирует", "она",
+      "пока", "инфракрасный", "луч",
+      "одна", "понуждаема", "прокладками",
+      "головки", "охохошеньки", "карьеры",
+      "презервативно-", "краснотаблеточный", "дул",
+      "обувь", "от", "McDonald’s",
+      "цилиндров", "герцог", "выглядеть",
+      "призарделася", "дноуглубительная", "смузи",
+      "которого", "продавец", "ветер",
+      "старинной", "из", "факта",
+      "виясь", "глазастую", "эдакая",
+      "фиалкокудрыя", "штревели", "кабы",
+      "пемзы", "менее", "накануне",
+      "цельноламельный", "гранпасьянс", "развёрстость"
+    ];
+
+    const edgePairs = [
+      [1,0],[2,0],[4,3],[5,4],[4,0],[7,6],[8,7],[7,0],
+      [10,9],[11,10],[10,0],[13,12],[14,13],[13,4],
+      [16,15],[17,16],[16,4],[19,18],[20,19],[19,4],
+      [22,21],[23,22],[22,7],[25,24],[26,25],[25,7],
+      [28,27],[29,28],[28,7],[31,30],[32,31],[31,10],
+      [34,33],[35,34],[34,10],[37,36],[38,37],[37,10],
+      [40,39],[41,40],[40,13],[43,42],[44,43],[43,13],
+      [46,45],[47,46],[46,16],[49,48],[50,49],[49,16],
+      [52,51],[53,52],[52,19],[55,54],[56,55],[55,19],
+      [58,57],[59,58],[58,22],[61,60],[62,61],[61,22],
+      [64,63],[65,64],[64,25],[67,66],[68,67],[67,25],
+      [70,69],[71,70],[70,28],[73,72],[74,73],[73,28],
+      [76,75],[77,76],[76,31],[79,78],[80,79],[79,31],
+      [82,81],[83,82],[82,34],[85,84],[86,85],[85,34],
+      [88,87],[89,88],[88,34],[91,90],[92,91],[92,38],
+      [94,93],[95,94],[94,38],[97,96],[98,97],[97,38]
+    ];
+
+    const nodes = labels.map((label, id) => ({
+      id,
+      label,
+      group: Math.floor(id / 3)
+    }));
+
+    const edges = edgePairs.map(([from, to]) => ({
+      from,
+      to
+    }));
+
+    const slider = document.getElementById("rubyGraphDepth");
+    const value = document.getElementById("rubyGraphDepthValue");
+    const container = document.getElementById("rubyGraphNetwork");
+    const card = document.getElementById("rubyGraph");
+    const networkNodes = new vis.DataSet();
+    const networkEdges = new vis.DataSet();
+
+    const network = new vis.Network(
+      container,
+      {
+        nodes: networkNodes,
+        edges: networkEdges
+      },
+      {
+        nodes: {
+          shape: "dot",
+          size: 10,
+          borderWidth: 1,
+          color: {
+            background: "#ae81ff",
+            border: "#d5bdff"
+          },
+          font: {
+            face: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+            size: 12,
+            color: "#e6e6e6",
+            strokeWidth: 3,
+            strokeColor: "#101114"
+          }
+        },
+        edges: {
+          width: 1,
+          color: {
+            color: "#66d9ef",
+            opacity: 0.42
+          },
+          smooth: {
+            enabled: true,
+            type: "continuous"
+          }
+        },
+        physics: {
+          stabilization: {
+            iterations: 150
+          }
+        },
+        interaction: {
+          hover: true,
+          multiselect: false
+        }
+      }
+    );
+
+    // Создаём список соседних узлов для поиска расстояний от центрального узла.
+    const adjacency = new Map(
+      nodes.map(node => [node.id, []])
+    );
+
+    for (const edge of edges) {
+      adjacency.get(edge.from).push(edge.to);
+      adjacency.get(edge.to).push(edge.from);
+    }
+
+    // Поиск расстояний от центрального узла методом обхода в ширину.
+    const distances = new Map([[centerId, 0]]);
+    const queue = [centerId];
+
+    for (let index = 0; index < queue.length; index++) {
+      const current = queue[index];
+
+      for (const next of adjacency.get(current)) {
+        if (!distances.has(next)) {
+          distances.set(next, distances.get(current) + 1);
+          queue.push(next);
+        }
+      }
+    }
+
+    function applyDepth() {
+      const depth = Number(slider.value);
+      value.textContent = String(depth);
+
+      const visibleNodes = nodes
+        .filter(node =>
+          distances.has(node.id) &&
+          distances.get(node.id) <= depth
+        )
+        .map(node => {
+          if (node.id !== centerId) {
+            return node;
+          }
+
+          return {
+            ...node,
+            size: 16,
+            color: {
+              background: "#a6e22e",
+              border: "#e6ffc0"
+            },
+            font: {
+              face: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+              size: 14,
+              color: "#ffffff",
+              strokeWidth: 3,
+              strokeColor: "#101114"
+            }
+          };
+        });
+
+      const visibleNodeIds = new Set(
+        visibleNodes.map(node => node.id)
+      );
+
+      const visibleEdges = edges.filter(edge =>
+        visibleNodeIds.has(edge.from) &&
+        visibleNodeIds.has(edge.to)
+      );
+
+      networkNodes.clear();
+      networkNodes.add(visibleNodes);
+
+      networkEdges.clear();
+      networkEdges.add(visibleEdges);
+    }
+
+    function centerGraph() {
+      network.fit({
+        animation: {
+          duration: 450,
+          easingFunction: "easeInOutQuad"
+        }
+      });
+    }
+
+    slider.addEventListener("input", applyDepth);
+
+    document
+      .getElementById("rubyGraphCenter")
+      .addEventListener("click", centerGraph);
+
+    document
+      .getElementById("rubyGraphFullscreen")
+      .addEventListener("click", async () => {
+        if (!document.fullscreenElement) {
+          await card.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      });
+
+    document.addEventListener("fullscreenchange", () => {
+      setTimeout(centerGraph, 120);
+    });
+
+    window.addEventListener("resize", centerGraph);
+
+    applyDepth();
+    setTimeout(centerGraph, 200);
+  </script>
+</body>
+</html>
