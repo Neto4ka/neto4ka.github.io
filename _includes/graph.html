@@ -189,14 +189,10 @@
     width: 100%;
     height: clamp(320px, 70vw, 560px);
     background-color: var(--console);
-        background-image:
+    background-image:
       radial-gradient(120% 90% at 12% 8%, rgba(255, 46, 136, 0.13), transparent 55%),
       radial-gradient(120% 90% at 88% 92%, rgba(0, 208, 255, 0.13), transparent 55%),
-      radial-gradient(80% 70% at 50% 50%, rgba(124, 92, 255, 0.06), transparent 62%),
-      repeating-linear-gradient(90deg, rgba(124, 92, 255, 0.05) 0 1px, transparent 1px 48px),
-      repeating-linear-gradient(0deg, rgba(0, 255, 156, 0.03) 0 1px, transparent 1px 3px);
-
-
+      radial-gradient(80% 70% at 50% 50%, rgba(124, 92, 255, 0.06), transparent 62%);
     touch-action: none;
     overscroll-behavior: contain;
     transform: translateZ(0);
@@ -543,6 +539,7 @@
       let fitRequested = true;
       let lastWidth = 0;
       let lastHeight = 0;
+      let stabilized = false;
 
       function centerStyle() {
         const style = {
@@ -648,6 +645,8 @@
       }
 
       function applyDepth() {
+        stabilized = false;
+
         const depth = Number(depthSlider.value);
         depthOutput.textContent = String(depth);
 
@@ -678,13 +677,22 @@
         resizeCanvas();
       }
 
-      network.on("stabilizationIterationsDone", finishLayout);
-      network.on("stabilized", finishLayout);
+      network.on("stabilizationIterationsDone", () => {
+        stabilized = true;
+        finishLayout();
+      });
+
+      network.on("stabilized", () => {
+        stabilized = true;
+        finishLayout();
+      });
 
       if (typeof IntersectionObserver === "function") {
         const visibilityObserver = new IntersectionObserver((entries) => {
           if (entries.some((entry) => entry.isIntersecting)) {
-            network.startSimulation();
+            if (!stabilized) {
+              network.startSimulation();
+            }
           } else {
             network.stopSimulation();
           }
