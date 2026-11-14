@@ -1,9 +1,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
 
 <style>
+  :root {
+    --neon: #00ff00;
+    --neon-dim: rgba(0, 255, 0, 0.22);
+    --neon-glow-hover: rgba(0, 255, 0, 0.12);
+    --neon-glow-active: rgba(0, 255, 0, 0.20);
+    --neon-inset: rgba(0, 255, 0, 0.05);
+    --scanline: rgba(0, 0, 0, 0.1);
+    --term-font: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --term-size: 14px;
+    --edge: 40px;
+    --node-d: 20px;
+  }
+
   #rubyGraph,
   #rubyGraph * {
     box-sizing: border-box;
@@ -19,10 +32,8 @@
   #rubyGraph {
     --console: #0a0e14;
     --header: #000000;
-    --gutter: #737373;
     --text: #ffffff;
-    --neon: #00ff00;
-    --mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --mono: var(--term-font);
 
     width: 100%;
     margin: 0;
@@ -83,62 +94,58 @@
     align-items: center;
     gap: 8px;
     height: 40px;
-    padding: 0 6px 0 14px;
+    padding: 0 var(--edge);
     background: var(--header);
     flex: none;
+    container-type: inline-size;
   }
 
   #rubyGraph .ruby-graph__title {
-    color: var(--text);
+    color: var(--neon);
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: var(--term-size);
     font-weight: 400;
-    letter-spacing: 0.01em;
+    letter-spacing: normal;
     line-height: 1;
     white-space: nowrap;
   }
 
-  #rubyGraph .ruby-graph__slider {
-    width: 64px;
-    height: 1px;
+  #rubyGraph .ruby-graph__input {
     -webkit-appearance: none;
     appearance: none;
-    border: 0;
-    border-radius: 1px;
-    outline: none;
-    background: #4a4a4a;
-    cursor: pointer;
-    touch-action: none;
-  }
-
-  #rubyGraph .ruby-graph__slider::-webkit-slider-thumb {
-    width: 10px;
-    height: 10px;
-    -webkit-appearance: none;
-    appearance: none;
-    border: 0;
-    border-radius: 50%;
-    background: var(--neon);
-    cursor: pointer;
-  }
-
-  #rubyGraph .ruby-graph__slider::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
-    border: 0;
-    border-radius: 50%;
-    background: var(--neon);
-    cursor: pointer;
-  }
-
-  #rubyGraph .ruby-graph__value {
-    color: var(--text);
+    -moz-appearance: textfield;
+    width: calc(var(--term-size) * 3);
+    height: 24px;
+    padding: 0 4px;
+    border: 1px solid var(--neon-dim);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--neon);
+    caret-color: var(--neon);
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: var(--term-size);
     font-weight: 400;
-    font-variant-numeric: tabular-nums;
-    min-width: 14px;
+    line-height: 1;
     text-align: center;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    cursor: text;
+    flex: none;
+  }
+
+  #rubyGraph .ruby-graph__input::placeholder {
+    color: var(--neon-dim);
+  }
+
+  #rubyGraph .ruby-graph__input::-webkit-outer-spin-button,
+  #rubyGraph .ruby-graph__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  #rubyGraph .ruby-graph__input:focus {
+    border-color: var(--neon);
+    box-shadow: 0 0 0 1px var(--neon-dim);
   }
 
   #rubyGraph .ruby-graph__header-actions {
@@ -149,8 +156,8 @@
 
   #rubyGraph .ruby-graph__button {
     display: grid;
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     place-items: center;
     border: 0;
     border-radius: 6px;
@@ -160,27 +167,28 @@
   }
 
   #rubyGraph .ruby-graph__button:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--neon-glow-hover);
   }
 
   #rubyGraph .ruby-graph__button:active {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--neon-glow-active);
   }
 
   #rubyGraph .ruby-graph__button svg {
     display: block;
-    width: 14px;
-    height: 14px;
-    color: var(--text);
+    width: var(--node-d);
+    height: var(--node-d);
+    color: var(--neon);
     pointer-events: none;
   }
 
   #rubyGraph .ruby-graph__button:hover svg {
     color: var(--neon);
+    filter: drop-shadow(0 0 4px var(--neon));
   }
 
   #rubyGraph .ruby-graph__button:focus-visible {
-    outline: 2px solid var(--gutter);
+    outline: 2px solid var(--neon);
     outline-offset: 2px;
   }
 
@@ -211,11 +219,13 @@
     touch-action: none;
   }
 
-  @media (max-width: 480px) {
-    #rubyGraph .ruby-graph__header {
-      padding: 0 4px 0 12px;
+  @container (max-width: 480px) {
+    #rubyGraph .ruby-graph__title-extra {
+      display: none;
     }
+  }
 
+  @media (max-width: 480px) {
     #rubyGraph .ruby-graph__stage {
       height: 390px;
     }
@@ -236,17 +246,19 @@
 
 <section id="rubyGraph" aria-label="Интерактивный граф навигации">
   <header class="ruby-graph__header">
-    <h2 class="ruby-graph__title">navigation</h2>
+    <h2 class="ruby-graph__title">navigation<span class="ruby-graph__title-extra"> / shw.4rm4_dr4g0n</span></h2>
 
     <input
-      class="ruby-graph__slider"
+      class="ruby-graph__input"
       id="rubyGraphDepth"
-      type="range"
+      type="number"
       min="1"
       max="6"
       value="1"
+      placeholder="1-6"
+      inputmode="numeric"
+      aria-label="Глубина навигации от 1 до 6"
     >
-    <output class="ruby-graph__value" id="rubyGraphDepthValue" for="rubyGraphDepth">2</output>
 
     <div class="ruby-graph__header-actions">
       <button
@@ -442,7 +454,6 @@
       const stageWrap = stage.parentElement;
       const header = root.querySelector(".ruby-graph__header");
       const depthSlider = document.getElementById("rubyGraphDepth");
-      const depthOutput = document.getElementById("rubyGraphDepthValue");
       const centerButton = document.getElementById("rubyGraphCenter");
       const fullscreenButton = document.getElementById("rubyGraphFullscreen");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -643,8 +654,9 @@
       function applyDepth() {
         stabilized = false;
 
-        const depth = Number(depthSlider.value);
-        depthOutput.textContent = String(depth);
+        let depth = Number(depthSlider.value);
+        if (!Number.isFinite(depth) || depth < 1) depth = 1;
+        if (depth > maxDepth) depth = maxDepth;
 
         const visibleNodes = nodes
           .filter((node) => (depths.get(node.id) ?? Infinity) <= depth)
