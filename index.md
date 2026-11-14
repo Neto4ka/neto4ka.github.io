@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<pre id="terminal-pre"><a style="color: #00ff00; text-decoration: none;">[ f i n t i f a n t ] . s y s t e m . i n t e r r u p t .</a>
+<pre id="terminal-pre"><a style="color: var(--neon, #00ff00); text-decoration: none;">[ f i n t i f a n t ] . s y s t e m . i n t e r r u p t .</a>
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 |||||  / \ _ / \  |||||
@@ -159,6 +159,8 @@ layout: default
   background-color: #000000 !important;
   border: none !important;
   outline: none !important;
+  font-family: var(--term-font, ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace) !important;
+  font-size: var(--term-size, 14px) !important;
 }
 
 #terminal-code { 
@@ -174,12 +176,14 @@ layout: default
   background-color: #000000 !important;
   background-image: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.1) 0px,
-    rgba(0, 0, 0, 0.1) 1px,
+    var(--scanline, rgba(0, 0, 0, 0.1)) 0px,
+    var(--scanline, rgba(0, 0, 0, 0.1)) 1px,
     transparent 1px,
     transparent 3px
   ) !important;
-  box-shadow: inset 0 0 80px rgba(0, 255, 0, 0.05) !important;
+  box-shadow: inset 0 0 80px var(--neon-inset, rgba(0, 255, 0, 0.05)) !important;
+  font-family: var(--term-font, ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace) !important;
+  font-size: var(--term-size, 14px) !important;
 }
 
 #terminal-code pre,
@@ -192,6 +196,8 @@ layout: default
   word-break: keep-all !important;
   border: none !important;
   outline: none !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
 }
 
 #terminal-code * {
