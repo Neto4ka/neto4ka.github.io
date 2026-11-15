@@ -15,7 +15,7 @@
     --scanline: rgba(0, 0, 0, 0.1);
     --term-font: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
     --term-size: 14px;
-    --edge: 40px;
+    --edge: 20px;
     --node-d: 20px;
   }
 
@@ -112,47 +112,81 @@
     white-space: nowrap;
   }
 
-  #rubyGraph .ruby-graph__input {
-    -webkit-appearance: none;
-    appearance: none;
-    -moz-appearance: textfield;
-    width: calc(var(--term-size) * 3);
-    height: 26px;
-    padding: 0 4px;
-    border: 1px solid var(--keyword-dim);
-    border-radius: 0;
-    background: transparent;
-    color: var(--keyword);
-    caret-color: var(--keyword);
-    font-family: var(--mono);
-    font-size: calc(var(--term-size) + 1px);
-    font-weight: 400;
-    line-height: 1;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-    outline: none;
-    cursor: text;
+  #rubyGraph .ruby-graph__stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
     flex: none;
   }
 
-  #rubyGraph .ruby-graph__input::placeholder {
-    color: var(--keyword-dim);
+  #rubyGraph .ruby-graph__stepper-btn {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    color: #ffffff;
+    transition: transform 260ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
-  #rubyGraph .ruby-graph__input::-webkit-outer-spin-button,
-  #rubyGraph .ruby-graph__input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  #rubyGraph .ruby-graph__stepper-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    stroke-width: 1.8;
+    transition: stroke-width 260ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
-  #rubyGraph .ruby-graph__input:focus {
-    border-color: var(--keyword);
-    box-shadow: 0 0 0 1px var(--keyword-dim);
+  #rubyGraph .ruby-graph__stepper-btn:active {
+    transform: scale(0.94);
+    transition: transform 140ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  #rubyGraph .ruby-graph__stepper-btn:active svg {
+    stroke-width: 2.8;
+    transition: stroke-width 140ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  #rubyGraph .ruby-graph__stepper-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  #rubyGraph .ruby-graph__stepper-btn:disabled:active {
+    transform: none;
+  }
+
+  #rubyGraph .ruby-graph__stepper-btn:disabled:active svg {
+    stroke-width: 1.8;
+  }
+
+  #rubyGraph .ruby-graph__stepper-btn:focus-visible {
+    outline: 2px solid var(--neon);
+    outline-offset: 2px;
+  }
+
+  #rubyGraph .ruby-graph__stepper-value {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: calc(var(--term-size) + 1px);
+    font-weight: 400;
+    color: #ffffff;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
   }
 
   #rubyGraph .ruby-graph__header-actions {
     display: flex;
     align-items: center;
+    gap: 4px;
     margin-left: auto;
   }
 
@@ -165,28 +199,26 @@
     border-radius: 6px;
     background: transparent;
     cursor: pointer;
-    transition: background 150ms ease;
-  }
-
-  #rubyGraph .ruby-graph__button:hover {
-    background: var(--neon-glow-hover);
-  }
-
-  #rubyGraph .ruby-graph__button:active {
-    background: var(--neon-glow-active);
+    color: #ffffff;
+    transition: transform 260ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   #rubyGraph .ruby-graph__button svg {
     display: block;
     width: var(--node-d);
     height: var(--node-d);
-    color: #ffffff;
     pointer-events: none;
+    transition: stroke-width 260ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
-  #rubyGraph .ruby-graph__button:hover svg {
-    color: #ffffff;
-    filter: drop-shadow(0 0 4px #ffffff);
+  #rubyGraph .ruby-graph__button:active {
+    transform: scale(0.94);
+    transition: transform 140ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  #rubyGraph .ruby-graph__button:active svg {
+    stroke-width: 2.8;
+    transition: stroke-width 140ms cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   #rubyGraph .ruby-graph__button:focus-visible {
@@ -221,12 +253,6 @@
     touch-action: none;
   }
 
-  @container (max-width: 480px) {
-    #rubyGraph .ruby-graph__title-extra {
-      display: none;
-    }
-  }
-
   @media (max-width: 480px) {
     #rubyGraph .ruby-graph__stage {
       height: 390px;
@@ -240,7 +266,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #rubyGraph .ruby-graph__button {
+    #rubyGraph .ruby-graph__button,
+    #rubyGraph .ruby-graph__button svg,
+    #rubyGraph .ruby-graph__stepper-btn,
+    #rubyGraph .ruby-graph__stepper-btn svg {
       transition: none;
     }
   }
@@ -248,21 +277,33 @@
 
 <section id="rubyGraph" aria-label="Интерактивный граф навигации">
   <header class="ruby-graph__header">
-    <h2 class="ruby-graph__title">shw.4rm4_dr4g0n<span class="ruby-graph__title-extra"> / navigation</span></h2>
-
-    <input
-      class="ruby-graph__input"
-      id="rubyGraphDepth"
-      type="number"
-      min="1"
-      max="6"
-      value="1"
-      placeholder="1-6"
-      inputmode="numeric"
-      aria-label="Глубина навигации от 1 до 6"
-    >
+    <h2 class="ruby-graph__title">shw.4rm4_dr4g0n</h2>
 
     <div class="ruby-graph__header-actions">
+      <div class="ruby-graph__stepper" role="group" aria-label="Глубина навигации">
+        <button
+          class="ruby-graph__stepper-btn"
+          type="button"
+          id="rubyGraphDepthDec"
+          aria-label="Уменьшить глубину"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+            <path d="M5 12h14"></path>
+          </svg>
+        </button>
+        <span class="ruby-graph__stepper-value" id="rubyGraphDepthValue">1</span>
+        <button
+          class="ruby-graph__stepper-btn"
+          type="button"
+          id="rubyGraphDepthInc"
+          aria-label="Увеличить глубину"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+        </button>
+      </div>
+
       <button
         class="ruby-graph__button"
         type="button"
@@ -284,7 +325,7 @@
         aria-label="На весь экран"
         aria-pressed="false"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
           <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"></path>
         </svg>
       </button>
@@ -455,7 +496,9 @@
 
       const stageWrap = stage.parentElement;
       const header = root.querySelector(".ruby-graph__header");
-      const depthSlider = document.getElementById("rubyGraphDepth");
+      const depthValue = document.getElementById("rubyGraphDepthValue");
+      const depthDec = document.getElementById("rubyGraphDepthDec");
+      const depthInc = document.getElementById("rubyGraphDepthInc");
       const centerButton = document.getElementById("rubyGraphCenter");
       const fullscreenButton = document.getElementById("rubyGraphFullscreen");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -470,8 +513,26 @@
       const depths = measureDepths(CENTER_ID, adjacency);
       const maxDepth = Math.max(...depths.values());
 
-      depthSlider.max = String(maxDepth);
-      depthSlider.value = String(Math.min(Number(depthSlider.value), maxDepth));
+      let currentDepth = 1;
+
+      function updateDepthButtons() {
+        depthDec.disabled = currentDepth <= 1;
+        depthInc.disabled = currentDepth >= maxDepth;
+      }
+
+      function setDepth(newDepth) {
+        if (!Number.isFinite(newDepth) || newDepth < 1) newDepth = 1;
+        if (newDepth > maxDepth) newDepth = maxDepth;
+
+        currentDepth = newDepth;
+        depthValue.textContent = String(currentDepth);
+        updateDepthButtons();
+        applyDepth();
+
+        if (document.activeElement && typeof document.activeElement.blur === "function") {
+          document.activeElement.blur();
+        }
+      }
 
       const nodes = LABELS.map((label, id) => {
         const tone = PERL_PALETTE[id % PERL_PALETTE.length];
@@ -656,12 +717,8 @@
       function applyDepth() {
         stabilized = false;
 
-        let depth = Number(depthSlider.value);
-        if (!Number.isFinite(depth) || depth < 1) depth = 1;
-        if (depth > maxDepth) depth = maxDepth;
-
         const visibleNodes = nodes
-          .filter((node) => (depths.get(node.id) ?? Infinity) <= depth)
+          .filter((node) => (depths.get(node.id) ?? Infinity) <= currentDepth)
           .map((node) => (
             node.id === CENTER_ID
               ? { ...node, ...centerStyle() }
@@ -721,7 +778,13 @@
         window.clearTimeout(fitTimer);
       });
 
-      depthSlider.addEventListener("input", applyDepth);
+      depthDec.addEventListener("click", () => {
+        setDepth(currentDepth - 1);
+      });
+
+      depthInc.addEventListener("click", () => {
+        setDepth(currentDepth + 1);
+      });
 
       centerButton.addEventListener("click", () => {
         fitRequested = false;
@@ -794,7 +857,7 @@
         scheduleFit(SETTLE_DELAY_MS);
       });
 
-      applyDepth();
+      setDepth(1);
       resizeCanvas();
 
       probeImage(CENTER_IMAGE_URL).then((image) => {
