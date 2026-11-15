@@ -121,7 +121,7 @@
 
   #rubyGraph .ruby-graph__stepper-btn {
     display: grid;
-    width: 34px;
+    width: 26px;
     height: 34px;
     place-items: center;
     border: 0;
@@ -171,7 +171,7 @@
 
   #rubyGraph .ruby-graph__stepper-value {
     display: grid;
-    width: 34px;
+    width: 22px;
     height: 34px;
     place-items: center;
     font-family: var(--mono);
@@ -186,14 +186,14 @@
   #rubyGraph .ruby-graph__header-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     margin-left: auto;
-    margin-right: -7px;
+    margin-right: -4px;
   }
 
   #rubyGraph .ruby-graph__button {
     display: grid;
-    width: 34px;
+    width: 28px;
     height: 34px;
     place-items: center;
     border: 0;
@@ -266,6 +266,16 @@
     }
   }
 
+  @media (max-width: 360px) {
+    #rubyGraph .ruby-graph__header {
+      gap: 6px;
+    }
+
+    #rubyGraph .ruby-graph__title {
+      font-size: 12px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     #rubyGraph .ruby-graph__button,
     #rubyGraph .ruby-graph__button svg,
@@ -303,33 +313,31 @@
             <path d="M12 5v14M5 12h14"></path>
           </svg>
         </button>
+        <button
+          class="ruby-graph__button"
+          type="button"
+          id="rubyGraphCenter"
+          title="Центрировать граф"
+          aria-label="Центрировать граф"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M3.5 12h17M12 3c2.5 2.5 3.7 5.5 3.7 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.7 5.5-3.7 9S9.5 18.5 12 21"></path>
+          </svg>
+        </button>
+        <button
+          class="ruby-graph__button"
+          type="button"
+          id="rubyGraphFullscreen"
+          title="На весь экран"
+          aria-label="На весь экран"
+          aria-pressed="false"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"></path>
+          </svg>
+        </button>
       </div>
-
-      <button
-        class="ruby-graph__button"
-        type="button"
-        id="rubyGraphCenter"
-        title="Центрировать граф"
-        aria-label="Центрировать граф"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M3.5 12h17M12 3c2.5 2.5 3.7 5.5 3.7 9S14.5 18.5 12 21M12 3c-2.5 2.5-3.7 5.5-3.7 9S9.5 18.5 12 21"></path>
-        </svg>
-      </button>
-
-      <button
-        class="ruby-graph__button"
-        type="button"
-        id="rubyGraphFullscreen"
-        title="На весь экран"
-        aria-label="На весь экран"
-        aria-pressed="false"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-          <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"></path>
-        </svg>
-      </button>
     </div>
   </header>
 
