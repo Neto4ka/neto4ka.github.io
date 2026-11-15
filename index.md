@@ -134,10 +134,10 @@ layout: default
                      ||  13f4kt4_v1y4s                   ||
                      ||||||||||||||||||||||||||||||||||||
 
-02[0x00E510]: 49 4E 46 52 41 52 45 44  20 4C 49 47 48 54 20 42 | INFRARED LIGHT B
-02[0x00E520]: 45 41 4D 20 4K 41 42 59  20 56 45 54 45 52 20 44 | EAM KABY VETER D
-02[0x00E530]: 55 4C 20 49 53 20 46 41  4B 54 41 20 56 49 59 41 | UL IS FAKTA VIYA
-02[0x00E540]: 53 21 21 21 00 00 00 00  00 00 00 00 00 00 00 00 | S!!!............
+02[0x00E510]: 49 4E 46 52 41 52 45 44  4C 49 47 48 54 20 42 | INFRARED LIGHT B
+02[0x00E520]: 45 41 4D 20 4B 41 42 59  20 56 45 54 45 52 20 | EAM KABY VETER D
+02[0x00E530]: 55 4C 20 49 53 20 46 41  4B 54 41 20 56 49 59 | UL IS FAKTA VIYA
+02[0x00E540]: 53 21 21 21 00 00 00 00  00 00 00 00 00 00 00 | S!!!............
 
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 \/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
@@ -151,7 +151,7 @@ layout: default
 </div>
 
 {% include graph.html %}
-  
+
 <style>
 #terminal-pre {
   margin: 0 !important;
@@ -167,7 +167,7 @@ layout: default
   position: relative !important; 
   width: 100% !important;
   margin-top: 0 !important;
-  padding: 0 20px 20px !important;
+  padding: 0 var(--edge, 20px) !important;
   box-sizing: border-box !important;
   border: none !important;
   outline: none !important;
