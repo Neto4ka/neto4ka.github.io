@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<pre id="terminal-pre"><a style="color: var(--neon, #00ff00); text-decoration: none;">[ f i n t i f a n t ] . s y s t e m . i n t e r r u p t .</a>
+<pre id="terminal-pre"><a style="color: #009900; text-decoration: none;">[ f i n t i f a n t ] . s y s t e m . i n t e r r u p t .</a>
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 |||||  / \ _ / \  |||||
