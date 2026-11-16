@@ -1,7 +1,6 @@
 # neto4ka.github.io
 
-[![Live site](https://img.shields.io/badge/live-neto4ka.github.io-b5e853?style=flat-square&labelColor=000000)](https://neto4ka.github.io/)
-[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
+[![Live site](https://img.shields.io/badge/live-neto4ka.github.io-b5e853?style=flat-square&labelColor=000000)](https://neto4ka.github.io/)[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Delta Chat](https://img.shields.io/badge/Delta_Chat-channel-317da8?style=flat-square)](https://deltachat.id/neto4ka)
 
 Source of **[neto4ka.github.io](https://neto4ka.github.io/)** — a static site
