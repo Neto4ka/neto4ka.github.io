@@ -349,18 +349,18 @@
     const VIS_URL = "https://cdn.jsdelivr.net/npm/vis-network@10.1.5/standalone/umd/vis-network.min.js";
     const CENTER_ID = 0;
     const NODE_SIZE = 10;
-    const CENTER_SIZE = NODE_SIZE + 0.75;
     const NODE_FONT = {
       face: "Inter, system-ui, sans-serif",
       size: 12,
       color: "#d8e2ee"
     };
-    const CENTER_LINK_URL = "https://www.themoviedb.org/review/6ace164b797f07450ce77e31";
-    const CENTER_IMAGE_URL = "https://image.tmdb.org/t/p/w342/rsi7YM9D4ny5HhcSMG1c724jmsk.jpg";
-    const IMAGE_TIMEOUT_MS = 4000;
+
     const FIT_DELAY_MS = 160;
     const SETTLE_DELAY_MS = 420;
     const RESIZE_DELAY_MS = 120;
+
+    const ICON_EXPAND = "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5";
+    const ICON_COLLAPSE = "M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5";
 
     const PERL_PALETTE = [
       "#ff2e88",
@@ -446,33 +446,6 @@
       return depths;
     }
 
-    function probeImage(url) {
-      return new Promise((resolve) => {
-        const image = new Image();
-        let timer = 0;
-        let settled = false;
-
-        const finish = (loaded) => {
-          if (settled) return;
-
-          settled = true;
-          window.clearTimeout(timer);
-          image.onload = null;
-          image.onerror = null;
-          resolve(loaded ? image : null);
-        };
-
-        timer = window.setTimeout(() => finish(false), IMAGE_TIMEOUT_MS);
-        image.onload = () => finish(image.naturalWidth > 0);
-        image.onerror = () => finish(false);
-        image.src = url;
-
-        if (image.complete) {
-          finish(image.naturalWidth > 0);
-        }
-      });
-    }
-
     function loadVis() {
       return new Promise((resolve, reject) => {
         if (typeof vis !== "undefined") {
@@ -505,6 +478,10 @@
       const centerButton = document.getElementById("rubyGraphCenter");
       const fullscreenButton = document.getElementById("rubyGraphFullscreen");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!stageWrap || !header || !depthValue || !depthDec || !depthInc || !centerButton || !fullscreenButton) {
+        return;
+      }
 
       const adjacency = new Map(LABELS.map((_, id) => [id, []]));
 
@@ -605,33 +582,12 @@
         }
       );
 
-      let centerImageUrl = "";
-      let centerVAdjust = 0;
       let fitTimer = 0;
       let resizeTimer = 0;
       let fitRequested = true;
       let lastWidth = 0;
       let lastHeight = 0;
       let stabilized = false;
-
-      function centerStyle() {
-        const style = {
-          shape: centerImageUrl ? "circularImage" : "dot",
-          size: CENTER_SIZE,
-          borderWidth: 0,
-          borderWidthSelected: 0,
-          font: {
-            ...NODE_FONT,
-            vadjust: centerVAdjust
-          }
-        };
-
-        if (centerImageUrl) {
-          style.image = centerImageUrl;
-        }
-
-        return style;
-      }
 
       function fitGraph() {
         network.fit(
@@ -717,12 +673,7 @@
         stabilized = false;
 
         const visibleNodes = nodes
-          .filter((node) => (depths.get(node.id) ?? Infinity) <= currentDepth)
-          .map((node) => (
-            node.id === CENTER_ID
-              ? { ...node, ...centerStyle() }
-              : node
-          ));
+          .filter((node) => (depths.get(node.id) ?? Infinity) <= currentDepth);
 
         const visibleNodeIds = new Set(visibleNodes.map((node) => node.id));
 
@@ -799,26 +750,19 @@
         window.addEventListener("orientationchange", scheduleResize);
       }
 
-      network.on("click", (params) => {
-        if (params.nodes.length === 1 && params.nodes[0] === CENTER_ID) {
-          window.open(CENTER_LINK_URL, "_blank", "noopener,noreferrer");
-        }
-      });
-
-      network.on("hoverNode", (params) => {
-        stage.style.cursor = params.node === CENTER_ID ? "pointer" : "";
-      });
-
-      network.on("blurNode", () => {
-        stage.style.cursor = "";
-      });
-
       function updateFullscreenLabel(isFullscreen) {
         const label = isFullscreen ? "Свернуть" : "На весь экран";
+        const icon = isFullscreen ? ICON_COLLAPSE : ICON_EXPAND;
 
         fullscreenButton.title = label;
         fullscreenButton.setAttribute("aria-label", label);
         fullscreenButton.setAttribute("aria-pressed", String(isFullscreen));
+
+        const path = fullscreenButton.querySelector("path");
+
+        if (path) {
+          path.setAttribute("d", icon);
+        }
       }
 
       function setExpanded(isOn) {
@@ -829,20 +773,26 @@
       function toggleFullscreen() {
         const next = !isExpanded();
 
-        if (document.fullscreenEnabled) {
-          const request = document.fullscreenElement
-            ? document.exitFullscreen()
-            : root.requestFullscreen();
-
-          request.catch(() => {
-            setExpanded(next);
-            scheduleFit();
-            scheduleFit(SETTLE_DELAY_MS);
-          });
-        } else {
+        function fallback() {
           setExpanded(next);
           scheduleFit();
           scheduleFit(SETTLE_DELAY_MS);
+        }
+
+        if (document.fullscreenEnabled) {
+          const request = document.fullscreenElement
+            ? document.exitFullscreen()
+            : (typeof root.requestFullscreen === "function"
+                ? root.requestFullscreen()
+                : null);
+
+          if (request && typeof request.catch === "function") {
+            request.catch(fallback);
+          } else if (!request) {
+            fallback();
+          }
+        } else {
+          fallback();
         }
       }
 
@@ -858,24 +808,7 @@
 
       setDepth(1);
       resizeCanvas();
-
-      probeImage(CENTER_IMAGE_URL).then((image) => {
-        if (image) {
-          const ratio = image.naturalHeight / image.naturalWidth;
-
-          centerImageUrl = CENTER_IMAGE_URL;
-          centerVAdjust = -CENTER_SIZE * Math.max(0, ratio - 1);
-        }
-
-        if (nodeSet.get(CENTER_ID)) {
-          nodeSet.update({
-            id: CENTER_ID,
-            ...centerStyle()
-          });
-
-          network.redraw();
-        }
-      });
+      updateFullscreenLabel(false);
 
       if (document.fonts && typeof document.fonts.load === "function") {
         document.fonts.load("12px Inter", "голосования McDonald's")
@@ -909,7 +842,11 @@
         window.removeEventListener("scroll", queueStart);
 
         const run = () => {
-          loadVis().then(init).catch(() => {});
+          loadVis()
+            .then(init)
+            .catch((error) => {
+              console.error("rubyGraph:", error);
+            });
         };
 
         if (typeof window.requestIdleCallback === "function") {
